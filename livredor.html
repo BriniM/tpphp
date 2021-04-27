@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Livre d'or</title>
+    <style>
+      .flex {
+        display: flex;
+      }
+
+      .column {
+        flex-direction: column;
+      }
+      .margin-t {
+        margin-top: 1rem;
+      }
+
+      table {
+          border: 1px solid black;
+      }
+
+      tr > td {
+          border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/api.php" method="POST">
+      <div class="flex">
+        <div class="flex column">
+          <label for="nom">Nom</label>
+          <label for="mail">Mail</label>
+          <label for="commentaire">Commentaire</label>
+        </div>
+        <div class="flex column">
+          <input type="text" name="nom" id="nom" required/>
+          <input type="text" name="mail" id="mail" required/>
+          <textarea rows="5" cols="50" name="commentaire" id="commentaire" required/></textarea>
+        </div>
+      </div>
+      <input type="submit" value="Envoyer" class="margin-t" />
+      <input type="button" value="Afficher les commentaires" onClick="javascript:displayComments()" />
+    </form>
+    <div id="comments"></div>
+  </body>
+    <script>
+        async function displayComments() {
+            var commentsElement = document.querySelector('#comments');
+
+            if (commentsElement.innerHTML.length > 0)
+            {
+                commentsElement.innerHTML = "";
+                return;
+            }
+
+            var comments = await fetch('/api.php');
+            var commentsJson = await comments.json();
+            commentsJson.commentaires.map((comment, index) => {
+                var commentDate = new Date(comment.time * 1000);
+                var year = commentDate.getFullYear();
+                var months = commentDate.getMonth();
+                var days = commentDate.getDate();
+
+                var commentsTableHtml = `
+                <table class="margin-t">
+                    <tr>
+                        <td>${index + 1} : ${year}/${months}/${days}</td>
+                        <td>${comment.nom}</td>
+                        <td>${comment.mail}</td>
+                    </tr>
+                    <tr> 
+                        <td colspan="3">${comment.commentaire}</td>
+                    </tr>
+                </table>
+                `
+
+            commentsElement.innerHTML += commentsTableHtml;
+            })
+        }
+    </script>
+</html>
